@@ -4,23 +4,26 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:arkham_parse/parsers/arkham_parse.dart';
-import 'package:http/http.dart' as http;
 
 import 'models/parse_error.dart';
 import 'models/parse_result.dart';
 
-const arkhamLink = 'https://platform.arkhamintelligence.com/explorer/address/0xD8D6fFE342210057BF4DCc31DA28D006f253cEF0';
-const availableDomains = ['https://platform.arkhamintelligence.com/'];
+void main() async {
+  final file = await File(
+          'C:/Users/osenk/Desktop/Dart Practice/test_page/lib/arkham.txt')
+      .readAsString();
+  final result = await Parser(file: file).parse();
+  final statisticCsv = File('statistic.csv');
 
-void main(List<String> arguments) async {
-  //link takes the value from available const
-  //will change to cmd input late
-  const link = arkhamLink;
-  final result = await Parser(link: link).parse();
   if (result.statistic != null) {
     final statistic = result.statistic!;
-    print(statistic.coin);
-    print(statistic.previousValue);
+
+    statisticCsv.writeAsStringSync('${'Coin'}, ${'Previous'}, ${'Current'}\n', mode: FileMode.append);
+    for (var i = 0; i < statistic.coin.length; i++) {
+      statisticCsv.writeAsStringSync('${statistic.coin[i]}, ${statistic.previousValue[i]}, ${statistic.currentValue[i]}\n', mode: FileMode.append);
+    }
+    statisticCsv.create();
+    print('CSV File successfully created!!');
   } else {
     print(result.error?.title);
     print(result.error?.content);
@@ -28,49 +31,32 @@ void main(List<String> arguments) async {
 }
 
 class Parser {
-  final String link;
+  final String file;
 
-  Parser({required this.link});
+  Parser({required this.file});
 
   Future<ParseResult> parse() async {
-    if (availableDomains.any((site) => link.contains(site))) {
-      try {
-        final response = await http.get(Uri.parse(link));
-        if (response.statusCode == 200) {
-          return ParseResult(
+    try {
+      if (file.isNotEmpty) {
+        return ParseResult(
             statistic: await ArkhamParse(
-              response: response,
-              link: link,
-            ).parseStatistic(),
-          );
-        } else {
-          return ParseResult(
-            error: ParseError(
-              title: 'Unable to fetch data.',
-              content: 'Please try again later.',
-            ),
-          );
-        }
-      } on TimeoutException catch (_) {
+          file: file,
+        ).parseStatistic());
+      } else {
         return ParseResult(
           error: ParseError(
-            title: 'Request timed out.',
-            content: 'Please try again later.',
-          ),
-        );
-      } catch (e) {
-        return ParseResult(
-          error: ParseError(
-            title: e.toString(),
-            content: 'Please try again later.',
+            title: 'Невозможно получить данные.',
+            content: 'Попробуйте позже.',
           ),
         );
       }
+    } catch (e) {
+      return ParseResult(
+        error: ParseError(
+          title: e.toString(),
+          content: 'Попробуйте позже.',
+        ),
+      );
     }
-    return ParseResult(
-      error: ParseError(
-        title: 'No parser available for this site.',
-      ),
-    );
   }
 }

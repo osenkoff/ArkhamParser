@@ -1,33 +1,36 @@
-import 'dart:convert';
-
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
-import "package:http/http.dart";
 
 import '../models/statistic.dart';
 
 class ArkhamParse {
-  final Response response;
-  final String link;
+  final String file;
 
-  ArkhamParse({
-    required this.response,
-    required this.link,
-  });
+  ArkhamParse({required this.file});
 
   Future<Statistic> parseStatistic() async {
-    final soup = BeautifulSoup(
-      utf8.decode(response.bodyBytes),
-    );
+    BeautifulSoup soup = BeautifulSoup(file);
 
-    //To check what soup back
-    print(soup);
-
-    final coin = soup.findAll('a', class_: 'TimeMachine_start__BDapq').toString();
-    final previousValue = soup.findAll('span', class_: 'TimeMachine_numberWithIndicator__JnH6m').toString();
+    final assetsColumns = soup
+        .findAll('div', class_: 'TimeMachine_portfolioGrid__MTxZX')
+        .toList();
+    final coin = soup
+        .findAll('a', class_: 'TimeMachine_start__BDapq')
+        .map((elem) => elem.text ?? '')
+        .toSet()
+        .toList();
+    final previousValue = assetsColumns[0]
+        .findAll('div', class_: 'TimeMachine_holdingsAmount__Td8Wg')
+        .map((elem) => elem.text)
+        .toList();
+    final currentValue = assetsColumns[1]
+        .findAll('div', class_: 'TimeMachine_holdingsAmount__Td8Wg')
+        .map((elem) => elem.text)
+        .toList();
 
     return Statistic(
       coin: coin,
       previousValue: previousValue,
+      currentValue: currentValue,
     );
   }
 }

@@ -1,16 +1,11 @@
 class Statistic {
-  final String coin;
-  final String previousValue;
-  //final String? currentValue;
+  final List<String> coin;
+  final List<String> previousValue;
+  final List<String> currentValue;
 
   Statistic({
     required this.coin,
     required this.previousValue,
-    //this.currentValue,
+    required this.currentValue,
   });
-
-  @override
-  String toString() {
-    return coin;
-  }
 }
