@@ -1,5 +1,5 @@
-import 'package:arkham_parse/models/parse_error.dart';
-import 'package:arkham_parse/models/statistic.dart';
+import 'package:arkham/models/parse_error.dart';
+import 'package:arkham/models/statistic.dart';
 
 class ParseResult {
   final ParseError? error;

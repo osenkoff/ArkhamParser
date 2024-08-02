@@ -3,34 +3,49 @@ import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import '../models/statistic.dart';
 
 class ArkhamParse {
-  final String file;
+  final String content;
 
-  ArkhamParse({required this.file});
+  ArkhamParse({required this.content});
 
-  Future<Statistic> parseStatistic() async {
-    BeautifulSoup soup = BeautifulSoup(file);
+  Future<Statistic?> parseStatistic() async {
+    BeautifulSoup soup = BeautifulSoup(content);
 
-    final assetsColumns = soup
-        .findAll('div', class_: 'TimeMachine_portfolioGrid__MTxZX')
-        .toList();
-    final coin = soup
-        .findAll('a', class_: 'TimeMachine_start__BDapq')
+    final element = soup.find('', class_: 'TimeMachine_desktopHeader');
+
+    if (element == null) {
+      return null;
+    }
+
+    final assetsColumns =
+        element.findAll('div', class_: 'TimeMachine_portfolioGrid').toList();
+    final coinNames = assetsColumns[0]
+        .findAll('a', class_: 'TimeMachine_start')
         .map((elem) => elem.text ?? '')
         .toSet()
         .toList();
     final previousValue = assetsColumns[0]
-        .findAll('div', class_: 'TimeMachine_holdingsAmount__Td8Wg')
+        .findAll('div', class_: 'TimeMachine_holdingsAmount')
         .map((elem) => elem.text)
         .toList();
     final currentValue = assetsColumns[1]
-        .findAll('div', class_: 'TimeMachine_holdingsAmount__Td8Wg')
+        .findAll('div', class_: 'TimeMachine_holdingsAmount')
         .map((elem) => elem.text)
         .toList();
 
+    final coins = <Coin>[];
+
+    for (var i = 0; i < coinNames.length; i++) {
+      final name = coinNames[i];
+      final prev = previousValue[i];
+      final current = currentValue[i];
+
+      coins.add(
+        Coin(name: name, previousValue: prev, currentValue: current),
+      );
+    }
+
     return Statistic(
-      coin: coin,
-      previousValue: previousValue,
-      currentValue: currentValue,
+      coins: coins,
     );
   }
 }

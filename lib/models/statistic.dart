@@ -1,10 +1,18 @@
 class Statistic {
-  final List<String> coin;
-  final List<String> previousValue;
-  final List<String> currentValue;
+  final List<Coin> coins;
 
   Statistic({
-    required this.coin,
+    required this.coins,
+  });
+}
+
+class Coin {
+  final String name;
+  final String previousValue;
+  final String currentValue;
+
+  Coin({
+    required this.name,
     required this.previousValue,
     required this.currentValue,
   });

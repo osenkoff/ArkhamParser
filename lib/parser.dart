@@ -1,47 +1,23 @@
 library parser;
 
 import 'dart:async';
-import 'dart:io';
 
-import 'package:arkham_parse/parsers/arkham_parse.dart';
+import 'parsers/arkham_parse.dart';
 
 import 'models/parse_error.dart';
 import 'models/parse_result.dart';
 
-void main() async {
-  final file = await File(
-          'C:/Users/osenk/Desktop/Dart Practice/test_page/lib/arkham.txt')
-      .readAsString();
-  final result = await Parser(file: file).parse();
-  final statisticCsv = File('statistic.csv');
-
-  if (result.statistic != null) {
-    final statistic = result.statistic!;
-
-    statisticCsv.writeAsStringSync('${'Coin'}, ${'Previous'}, ${'Current'}\n', mode: FileMode.append);
-    for (var i = 0; i < statistic.coin.length; i++) {
-      statisticCsv.writeAsStringSync('${statistic.coin[i]}, ${statistic.previousValue[i]}, ${statistic.currentValue[i]}\n', mode: FileMode.append);
-    }
-    statisticCsv.create();
-    print('CSV File successfully created!!');
-  } else {
-    print(result.error?.title);
-    print(result.error?.content);
-  }
-}
-
 class Parser {
-  final String file;
+  final String content;
 
-  Parser({required this.file});
+  Parser(this.content);
 
   Future<ParseResult> parse() async {
     try {
-      if (file.isNotEmpty) {
+      if (content.isNotEmpty) {
         return ParseResult(
-            statistic: await ArkhamParse(
-          file: file,
-        ).parseStatistic());
+          statistic: await ArkhamParse(content: content).parseStatistic(),
+        );
       } else {
         return ParseResult(
           error: ParseError(
