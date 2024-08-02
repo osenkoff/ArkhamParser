@@ -23,10 +23,6 @@ class ArkhamParse {
         .map((elem) => elem.text)
         .toSet()
         .toList();
-    final previousValue = assetsColumns[0]
-        .findAll('div', class_: 'TimeMachine_holdingsAmount')
-        .map((elem) => elem.text)
-        .toList();
     final currentValue = assetsColumns[1]
         .findAll('div', class_: 'TimeMachine_holdingsAmount')
         .map((elem) => elem.text)
@@ -45,14 +41,12 @@ class ArkhamParse {
 
     for (var i = 0; i < coinNames.length; i++) {
       final name = coinNames[i];
-      final prev = previousValue[i];
       final current = currentValue[i];
       final cost = costs[i];
 
       coins.add(
         Coin(
           name: name,
-          previousValue: prev,
           currentValue: current,
           cost: cost,
         ),

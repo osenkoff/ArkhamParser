@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:arkham/parser.dart';
+import 'package:date_format/date_format.dart';
 
 void main(List<String> args) {
   var parser = ArgParser();
@@ -23,12 +24,16 @@ void _run(ArgResults arguments) async {
   final input = arguments.option('input');
   final output = arguments.option('output');
   final minCostCoinsAsString = arguments.option('min_cost_coins');
-  final minCostCoins = minCostCoinsAsString != null ? double.tryParse(minCostCoinsAsString) : null;
+  final minCostCoins = minCostCoinsAsString != null
+      ? double.tryParse(minCostCoinsAsString)
+      : null;
 
   final file = File(input!);
 
   if (!file.existsSync()) {
-    throw Exception('File is not exist by "$input". Need to set the correct file path');
+    throw Exception(
+      'File is not exist by "$input". Need to set the correct file path',
+    );
   }
 
   final content = await file.readAsString();
@@ -46,10 +51,15 @@ void _run(ArgResults arguments) async {
   if (!statisticCsv.existsSync()) {
     // добавляем колонки в пустой файл
     statisticCsv.writeAsStringSync(
-      'Coin, Previous, Current\n',
+      'Coin, Current Count, Date\n',
       mode: FileMode.append,
     );
   }
+
+  final formattedTodayDate = formatDate(
+    DateTime.now(),
+    [dd, '-', mm, '-', yyyy],
+  );
 
   // записываем значения для cvs
   for (final coin in statistic.coins) {
@@ -57,7 +67,7 @@ void _run(ArgResults arguments) async {
       continue;
     }
     statisticCsv.writeAsStringSync(
-      '${coin.name}, ${coin.previousValue}, ${coin.currentValue}\n',
+      '${coin.name}, ${coin.currentValue}, $formattedTodayDate\n',
       mode: FileMode.append,
     );
   }
