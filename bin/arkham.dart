@@ -9,6 +9,7 @@ void main(List<String> args) {
   parser.addOption('input', defaultsTo: 'arkham.txt');
   parser.addOption('output', defaultsTo: 'statistic.csv');
   parser.addOption('min_cost_coins');
+  parser.addFlag('with_delimiter');
 
   var result = parser.parse(args);
 
@@ -23,6 +24,7 @@ void main(List<String> args) {
 void _run(ArgResults arguments) async {
   final input = arguments.option('input');
   final output = arguments.option('output');
+  final needToAddDelimiter = arguments.flag('with_delimiter');
   final minCostCoinsAsString = arguments.option('min_cost_coins');
   final minCostCoins = minCostCoinsAsString != null
       ? double.tryParse(minCostCoinsAsString)
@@ -52,6 +54,12 @@ void _run(ArgResults arguments) async {
     // добавляем колонки в пустой файл
     statisticCsv.writeAsStringSync(
       'Coin, Current Count, Date\n',
+      mode: FileMode.append,
+    );
+  } else if (needToAddDelimiter) {
+    // добавляем разделитель между данными
+    statisticCsv.writeAsStringSync(
+      ',,\n',
       mode: FileMode.append,
     );
   }
