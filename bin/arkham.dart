@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:arkham/models/statistic.dart';
 import 'package:arkham/parser.dart';
+import 'package:csv/csv.dart';
 import 'package:date_format/date_format.dart';
 
 void main(List<String> args) {
@@ -39,7 +41,6 @@ void _run(ArgResults arguments) async {
   }
 
   final content = await file.readAsString();
-
   final result = await Parser(content).parse();
 
   final statistic = result.statistic;
@@ -48,20 +49,38 @@ void _run(ArgResults arguments) async {
     throw Exception(result.error?.title);
   }
 
-  final statisticCsv = File(output!);
+  _generateCVS(
+    data: statistic,
+    outputPath: output!,
+    minCostCoins: minCostCoins ?? 0,
+    withDelimiter: needToAddDelimiter,
+  );
+
+  stdout.writeln('CSV created successfully. Placed in "$output"');
+}
+
+void _generateCVS({
+  required Statistic data,
+  required String outputPath,
+  required double minCostCoins,
+  bool withDelimiter = false,
+}) {
+  final statisticCsv = File(outputPath);
+
+  List<List<String>> headerAndDataList = [];
 
   if (!statisticCsv.existsSync()) {
-    // добавляем колонки в пустой файл
-    statisticCsv.writeAsStringSync(
-      'Coin, Current Count, Date\n',
-      mode: FileMode.append,
-    );
-  } else if (needToAddDelimiter) {
-    // добавляем разделитель между данными
-    statisticCsv.writeAsStringSync(
-      ',,\n',
-      mode: FileMode.append,
-    );
+    // добавляем колонки, если файла нет
+    headerAndDataList.add([
+      'Coin',
+      'Prev. Count',
+      'Current Count',
+      'Date',
+    ]);
+  } else if (withDelimiter) {
+    headerAndDataList.add([
+      '', '', '', '',
+    ]);
   }
 
   final formattedTodayDate = formatDate(
@@ -69,18 +88,23 @@ void _run(ArgResults arguments) async {
     [dd, '-', mm, '-', yyyy],
   );
 
-  // записываем значения для cvs
-  for (final coin in statistic.coins) {
-    if (minCostCoins != null && coin.cost < minCostCoins) {
+  // формируем значения для cvs
+  for (final coin in data.coins) {
+    if (coin.cost < minCostCoins) {
       continue;
     }
-    statisticCsv.writeAsStringSync(
-      '${coin.name}, ${coin.currentValue}, $formattedTodayDate\n',
-      mode: FileMode.append,
-    );
+    headerAndDataList.add([
+      coin.name,
+      coin.previousValue.toString(),
+      coin.currentValue.toString(),
+      formattedTodayDate,
+    ]);
   }
 
-  // сохраняем в файле
-  await statisticCsv.create();
-  stdout.writeln('CSV successfully created!! Placed in "$output"');
+  String csvData = const ListToCsvConverter().convert(headerAndDataList);
+
+  // записываем данные в файл
+  statisticCsv.writeAsStringSync('$csvData\n', mode: FileMode.append);
+  // сохраняем файл
+  statisticCsv.createSync();
 }

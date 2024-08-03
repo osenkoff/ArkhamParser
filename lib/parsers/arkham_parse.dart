@@ -23,9 +23,13 @@ class ArkhamParse {
         .map((elem) => elem.text)
         .toSet()
         .toList();
+    final previousValue = assetsColumns[0]
+        .findAll('div', class_: 'TimeMachine_holdingsAmount')
+        .map((elem) => _normalizeValue(elem.text))
+        .toList();
     final currentValue = assetsColumns[1]
         .findAll('div', class_: 'TimeMachine_holdingsAmount')
-        .map((elem) => elem.text)
+        .map((elem) => _normalizeValue(elem.text))
         .toList();
     final costs = assetsColumns[1]
         .findAll('div', class_: 'TimeMachine_holdings')
@@ -34,19 +38,21 @@ class ArkhamParse {
           elem.find('span', class_: 'TimeMachine_numberWithIndicator')?.text ??
               '0';
 
-      return _getCostValue(costValue);
+      return _normalizeValue(costValue);
     }).toList();
 
     final coins = <Coin>[];
 
     for (var i = 0; i < coinNames.length; i++) {
       final name = coinNames[i];
+      final prev = previousValue[i];
       final current = currentValue[i];
       final cost = costs[i];
 
       coins.add(
         Coin(
           name: name,
+          previousValue: prev,
           currentValue: current,
           cost: cost,
         ),
@@ -58,13 +64,13 @@ class ArkhamParse {
     );
   }
 
-  double _getCostValue(String cost) {
+  double _normalizeValue(String value) {
     final normalizedCost =
-        double.tryParse(cost.replaceAll(RegExp(r"[^.0-9]"), '')) ?? 0;
-    if (cost.contains('M')) {
+        double.tryParse(value.replaceAll(RegExp(r"[^.0-9]"), '')) ?? 0;
+    if (value.contains('M')) {
       return normalizedCost * 1000000;
     }
-    if (cost.contains('K')) {
+    if (value.contains('K')) {
       return normalizedCost * 1000;
     }
     return normalizedCost;
