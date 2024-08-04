@@ -1,0 +1,18 @@
+name: arkham
+description: A sample command-line application.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.4.1
+
+# Add regular dependencies here.
+dependencies:
+  beautiful_soup_dart: ^0.3.0
+  args: ^2.5.0
+  date_format: ^2.0.7
+  csv: ^6.0.0
+
+dev_dependencies:
+  lints: ^3.0.0
+  test: ^1.24.0
