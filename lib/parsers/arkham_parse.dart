@@ -21,7 +21,6 @@ class ArkhamParse {
     final coinNames = assetsColumns[0]
         .findAll('a', class_: 'TimeMachine_start')
         .map((elem) => elem.text)
-        .toSet()
         .toList();
     final previousValue = assetsColumns[0]
         .findAll('div', class_: 'TimeMachine_holdingsAmount')
@@ -32,7 +31,7 @@ class ArkhamParse {
         .map((elem) => _normalizeValue(elem.text))
         .toList();
     final costs = assetsColumns[1]
-        .findAll('div', class_: 'TimeMachine_holdings')
+        .findAll('div', class_: 'TimeMachine_holdings__')
         .map((elem) {
       final costValue =
           elem.find('span', class_: 'TimeMachine_numberWithIndicator')?.text ??

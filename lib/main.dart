@@ -8,5 +8,15 @@ void main() async {
   final content = file.readAsStringSync();
 
   final result = await Parser(content).parse();
+
+  const minCostCoins = 0;
+
+  for (final coin in result.statistic?.coins ?? []) {
+    if (coin.cost < minCostCoins) {
+      continue;
+    }
+
+    print('${coin.name} ${coin.cost}');
+  }
 }
 
