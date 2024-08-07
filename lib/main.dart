@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:arkham/parser.dart';
 
+import 'models/statistic.dart';
+
 void main() async {
   // only for test
   final file = File('bin/arkham.txt');
@@ -11,12 +13,12 @@ void main() async {
 
   const minCostCoins = 0;
 
-  for (final coin in result.statistic?.coins ?? []) {
+  for (final coin in result.statistic?.coins ?? <Coin>[]) {
     if (coin.cost < minCostCoins) {
       continue;
     }
 
-    print('${coin.name} ${coin.cost}');
+    print('${coin.name} ${coin.previousValue} ${coin.currentValue} ${coin.cost}');
   }
 }
 

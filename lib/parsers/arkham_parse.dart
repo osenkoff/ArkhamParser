@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 
 import '../models/statistic.dart';
@@ -66,11 +68,17 @@ class ArkhamParse {
   double _normalizeValue(String value) {
     final normalizedCost =
         double.tryParse(value.replaceAll(RegExp(r"[^.0-9]"), '')) ?? 0;
+    if (value.contains('T')) {
+      return normalizedCost * pow(10, 12);
+    }
+    if (value.contains('B')) {
+      return normalizedCost * pow(10, 9);
+    }
     if (value.contains('M')) {
-      return normalizedCost * 1000000;
+      return normalizedCost * pow(10, 6);
     }
     if (value.contains('K')) {
-      return normalizedCost * 1000;
+      return normalizedCost * pow(10, 3);
     }
     return normalizedCost;
   }
